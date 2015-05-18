@@ -45,7 +45,7 @@ def _get_reddit():
     return r
 
 def main():
-    r = _prepare_reddit()
+    r = _get_reddit()
     time_left = _get_counter()
 
     for subreddit in settings.SUBREDDITS:
