@@ -51,8 +51,9 @@ def main():
     for subreddit in settings.SUBREDDITS:
         sidebar = r.get_settings(subreddit)["description"]
 
-        sidebar_start = sidebar[:sidebar.find(START_STRING) + len(START_STRING)]
-        sidebar_end = sidebar[sidebar.find(END_STRING):]
+        sidebar_start = sidebar[:sidebar.find(settings.START_STRING) +
+            len(settings.START_STRING)]
+        sidebar_end = sidebar[sidebar.find(settings.END_STRING):]
 
         new_sidebar = sidebar_start + time_left + sidebar_end
         r.update_settings(r.get_subreddit(subreddit), description=new_sidebar)
