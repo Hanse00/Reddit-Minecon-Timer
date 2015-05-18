@@ -10,7 +10,7 @@ def _get_counter():
     event_tz = pytz.timezone(settings.EVENT_TIMEZONE)
     local_tz = pytz.timezone(settings.LOCAL_TIMEZONE)
 
-    evet_start = event_tz.localize(datetime.datetime.strptime(
+    event_start = event_tz.localize(datetime.datetime.strptime(
         settings.EVENT_START, settings.TIME_FORMAT))
     event_end = event_tz.localize(datetime.datetime.strptime(
         settings.EVENT_END, settings.TIME_FORMAT))

@@ -1,2 +1,5 @@
 # Don't sync virtual environment
 venv
+
+# Don't sync local settings test file
+settings.*
