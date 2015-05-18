@@ -4,32 +4,27 @@ import math
 import praw
 import pytz
 
-import user_info
-
-DEBUG = True
-
-SUBREDDIT = "Mustek"
-
-START_STRING = "[](#countstart)"
-END_STRING = "[](#countstop)"
-
-MINECON_TZ = pytz.timezone("Europe/London")
-LOCAL_TZ = pytz.timezone("Europe/Copenhagen")
-
-MINECON_START = MINECON_TZ.localize(datetime.datetime(2015, 07, 04, 10))
-MINECON_END = MINECON_TZ.localize(datetime.datetime(2015, 07, 05, 18))
+import settings
 
 def _get_counter():
-    now = LOCAL_TZ.localize(datetime.datetime.now())
+    event_tz = pytz.timezone(settings.EVENT_TIMEZONE)
+    local_tz = pytz.timezone(settings.LOCAL_TIMEZONE)
 
-    if now < MINECON_START:
-        days_left = (MINECON_START - now).days
+    evet_start = event_tz.localize(datetime.datetime.strptime(
+        settings.EVENT_START, settings.TIME_FORMAT))
+    event_end = event_tz.localize(datetime.datetime.strptime(
+        settings.EVENT_END, settings.TIME_FORMAT))
+
+    now = local_tz.localize(datetime.datetime.now())
+
+    if now < event_start:
+        days_left = (event_start - now).days
         if days_left > 1:
             return str(days_left) + " Days"
         elif days_left == 1:
             return "1 Day"
         else:
-            hours_left = ((MINECON_START - now).seconds) /  3600
+            hours_left = ((event_start - now).seconds) /  3600
 
             if hours_left > 1:
                 return str(hours_left) + " Hours"
@@ -37,25 +32,30 @@ def _get_counter():
                 return "1 Hour"
             else:
                 return "<1 Hour"
-    elif now >= MINECON_START and now <= MINECON_END:
+    elif now >= event_start and now <= event_end:
         return "Now!"
     else:
         return "Over :("
 
+def _get_reddit():
+    r = praw.Reddit("Minecon countdown by /u/Hanse00")
+    r.config.decode_html_entities = True
+    r.login(settings.USERNAME, settings.PASSWORD)
+
+    return r
+
 def main():
-    if DEBUG:
-        print _get_counter()
-    else:
-        r = praw.Reddit("Minecon countdown by /u/Hanse00")
-        r.config.decode_html_entities = True
-        r.login(user_info.USERNAME, user_info.PASSWORD)
-        sidebar = r.get_settings(SUBREDDIT)["description"]
+    r = _prepare_reddit()
+    time_left = _get_counter()
+
+    for subreddit in settings.SUBREDDITS:
+        sidebar = r.get_settings(subreddit)["description"]
 
         sidebar_start = sidebar[:sidebar.find(START_STRING) + len(START_STRING)]
         sidebar_end = sidebar[sidebar.find(END_STRING):]
 
-        new_sidebar = sidebar_start + _get_counter() + sidebar_end
-        r.update_settings(r.get_subreddit(SUBREDDIT), description=new_sidebar)
+        new_sidebar = sidebar_start + time_left + sidebar_end
+        r.update_settings(r.get_subreddit(subreddit), description=new_sidebar)
 
 if __name__ == "__main__":
     main()

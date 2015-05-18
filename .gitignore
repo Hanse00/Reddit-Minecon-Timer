@@ -1,5 +1,2 @@
 # Don't sync virtual environment
 venv
-
-# Don't track username and password
-user_info*
